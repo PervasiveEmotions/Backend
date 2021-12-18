@@ -38,34 +38,29 @@ eng = matlab.engine.connect_matlab(matlab_session)
 
 
 class Matlab(Resource):
-    def get(self):
-        data = eng.classify_input('filename1-1.wav')
-        return {'data': data}, 200  # return data and 200 OK code
 
-    def post(self):
+    def post(self): # HTTP, POST Request
         parse = reqparse.RequestParser()
-        parse.add_argument('audio', type=FileStorage, location='files')
+        parse.add_argument('audio', type=FileStorage, location='files') # Parses the audio data as M4P
         parse.add_argument('name', type=str)
 
         args = parse.parse_args()
 
         stream = args['audio']
         path = os.path.join("../Matlab/Sound/", args["name"]+".m4a")
-        print(path)
+        print(path) # For debug purposes
         outputPath = os.path.join("../Matlab/Sound/", args["name"]+".wav")
         stream.save(os.path.join("../Matlab/Sound/", args["name"]+".m4a"))
-        os.system('ffmpeg -i "%s" -t 4 "%s" ' % (path, outputPath))
-#
-#   File /home/semih/Study/Courses/Pervasive Computing/Project/Matlab/classify_input.m, liney 11, in classify_input
-# Transpose on ND array is not defined. Use PERMUTE instead.
+        os.system('ffmpeg -i "%s" -t 4 "%s" ' % (path, outputPath)) # Converts the audio to a wav file
 
-        data = eng.classify_input('./Sound/' + args["name"]+".wav")
+
+        data = eng.classify_input('./Sound/' + args["name"]+".wav") # Calls the Matlab Engine function
         return {'data': data}, 200  # return data and 200 OK code
 
 
 if __name__ == '__main__':
     app = Flask(__name__)
-    api = Api(app)
+    api = Api(app) # Main loop to initialize our api
 
     api.add_resource(Matlab, '/')  # '/users' is our entry point for Users
     print("running!")
